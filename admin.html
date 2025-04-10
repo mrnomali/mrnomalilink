@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Sub4Unlock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f7fa;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 450px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 { color: #333; margin-bottom: 10px; }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        select {
+            border: 1px solid #ddd;
+        }
+        button {
+            background: #4caf50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background: #4caf50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Admin Panel</h2>
+        <input type="text" id="newPassword" placeholder="Masukkan Password">
+        <input type="text" id="newLink" placeholder="Masukkan Link Tujuan">
+        
+        <select id="expireSelect">
+            <option value="86400000">1 Hari</option>
+            <option value="259200000">3 Hari</option>
+            <option value="604800000">1 Minggu</option>
+            <option value="1209600000">2 Minggu</option>
+            <option value="1814400000">3 Minggu</option>
+            <option value="2419200000">4 Minggu</option>
+            <option value="3024000000">5 Minggu</option>
+            <option value="3628800000">6 Minggu</option>
+            <option value="0">Permanen</option>
+        </select>
+
+        <button onclick="createEntry()">Buat Unlock</button>
+
+        <div class="table-container">
+            <h3>Data Tersimpan</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Password</th>
+                        <th>Link</th>
+                        <th>Expire</th>
+                    </tr>
+                </thead>
+                <tbody id="entryList"></tbody>
+            </table>
+        </div>
+
+        <button onclick="clearData()" style="background:#d9534f;">Hapus Semua Data</button>
+    </div>
+
+    <script>
+        function createEntry() {
+            let password = document.getElementById("newPassword").value;
+            let link = document.getElementById("newLink").value;
+            let expireTime = parseInt(document.getElementById("expireSelect").value);
+
+            if (!password || !link) {
+                alert("Password dan Link harus diisi!");
+                return;
+            }
+
+            let expireTimestamp = expireTime > 0 ? new Date().getTime() + expireTime : null;
+
+            let data = JSON.parse(localStorage.getItem("sub4unlock")) || {};
+            data[password] = { link, expire: expireTimestamp };
+            localStorage.setItem("sub4unlock", JSON.stringify(data));
+
+            document.getElementById("newPassword").value = "";
+            document.getElementById("newLink").value = "";
+            loadEntries();
+        }
+
+        function loadEntries() {
+            let data = JSON.parse(localStorage.getItem("sub4unlock")) || {};
+            let entryList = document.getElementById("entryList");
+            entryList.innerHTML = "";
+
+            let now = new Date().getTime();
+            for (let pass in data) {
+                if (data[pass].expire !== null && data[pass].expire < now) {
+                    delete data[pass];
+                } else {
+                    let expireText = data[pass].expire ? new Date(data[pass].expire).toLocaleString() : "Permanen";
+                    let row = `<tr>
+                        <td>${pass}</td>
+                        <td>${data[pass].link}</td>
+                        <td>${expireText}</td>
+                    </tr>`;
+                    entryList.innerHTML += row;
+                }
+            }
+            localStorage.setItem("sub4unlock", JSON.stringify(data));
+        }
+
+        function clearData() {
+            localStorage.removeItem("sub4unlock");
+            loadEntries();
+            alert("Semua data telah dihapus!");
+        }
+
+        loadEntries();
+    </script>
+
+</body>
+</html>

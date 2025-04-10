@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub4Unlock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #42a5f5, #478ed1);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 350px;
+        }
+        h2 { color: #333; }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: #42a5f5;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Masukkan Password</h2>
+        <input type="text" id="userPassword" placeholder="Masukkan Password">
+        <button onclick="checkPassword()">Buka Link</button>
+        <p id="message" style="color: red;"></p>
+    </div>
+
+    <script>
+        function checkPassword() {
+            let password = document.getElementById("userPassword").value;
+            let data = JSON.parse(localStorage.getItem("sub4unlock")) || {};
+            let now = new Date().getTime();
+
+            if (data[password] && (data[password].expire === null || data[password].expire > now)) {
+                window.location.href = data[password].link;
+            } else {
+                document.getElementById("message").innerText = "Password salah atau expired!";
+            }
+        }
+    </script>
+
+</body>
+</html>
